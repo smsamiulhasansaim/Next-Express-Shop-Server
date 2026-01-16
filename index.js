@@ -17,19 +17,38 @@ let items = [
 ];
 
 // Routes
-// 1. Get All Items
+// 1. Health Check Endpoint
+app.get('/api/health', (req, res) => {
+    const healthData = {
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        memoryUsage: process.memoryUsage(),
+        itemsCount: items.length,
+        database: 'mock',
+        version: '1.0.0'
+    };
+    
+    res.status(200).json({
+        success: true,
+        message: 'Server is running smoothly',
+        data: healthData
+    });
+});
+
+// 2. Get All Items
 app.get('/api/items', (req, res) => {
     res.json(items);
 });
 
-// 2. Get Single Item
+// 3. Get Single Item
 app.get('/api/items/:id', (req, res) => {
     const item = items.find(i => i.id === parseInt(req.params.id));
     if (!item) return res.status(404).json({ message: "Item not found" });
     res.json(item);
 });
 
-// 3. Add Item
+// 4. Add Item
 app.post('/api/items', (req, res) => {
     const newItem = {
         id: items.length + 1,
@@ -42,6 +61,21 @@ app.post('/api/items', (req, res) => {
     res.status(201).json(newItem);
 });
 
+// 5. Root endpoint
+app.get('/', (req, res) => {
+    res.json({
+        message: 'Welcome to E-commerce API',
+        endpoints: {
+            health: '/api/health',
+            getAllItems: '/api/items',
+            getSingleItem: '/api/items/:id',
+            addItem: '/api/items (POST)'
+        },
+        status: 'running'
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`Backend Server running at http://localhost:${PORT}`);
+    console.log(`Health check available at: http://localhost:${PORT}/api/health`);
 });
